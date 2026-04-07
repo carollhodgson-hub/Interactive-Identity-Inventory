@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Identity Inventory</title>
+  <style>
+    :root {
+      --bg1: #edf4ff;
+      --bg2: #f9fbff;
+      --card: rgba(255,255,255,0.88);
+      --card-border: rgba(118, 149, 255, 0.18);
+      --text: #1e2a39;
+      --muted: #5f6f84;
+      --accent: #5d72ff;
+      --accent-2: #8a5cff;
+      --accent-soft: rgba(93, 114, 255, 0.12);
+      --success: #2d9d78;
+      --shadow: 0 20px 45px rgba(55, 80, 140, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(138,92,255,0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(93,114,255,0.16), transparent 24%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .floating-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(10px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 240px;
+      height: 240px;
+      background: rgba(93,114,255,0.18);
+      top: -50px;
+      left: -50px;
+    }
+
+    .orb-2 {
+      width: 300px;
+      height: 300px;
+      background: rgba(138,92,255,0.14);
+      bottom: -80px;
+      right: -60px;
+      animation-duration: 15s;
+    }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(30px, 40px) scale(1.08); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 28px 18px 48px;
+    }
+
+    .hero {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.8s ease;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -60px -80px auto;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(93,114,255,0.13), transparent 70%);
+      border-radius: 50%;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      max-width: 980px;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .notice-wrap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .notice {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(93,114,255,0.14);
+      border-radius: 18px;
+      padding: 14px 16px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .notice strong { color: var(--text); }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 16px;
+      margin-bottom: 22px;
+      animation: fadeUp 0.95s ease;
+    }
+
+    .progress-area {
+      flex: 1 1 380px;
+      min-width: 260px;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+
+    .progress-labels strong { font-size: 1rem; }
+
+    .progress-meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(93,114,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: inherit;
+      transition: width 0.45s ease;
+      box-shadow: 0 0 16px rgba(93,114,255,0.35);
+    }
+
+    .toolbar-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease;
+    }
+
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      box-shadow: 0 10px 24px rgba(93,114,255,0.24);
+    }
+
+    .secondary-btn {
+      background: white;
+      color: var(--text);
+      border: 1px solid rgba(93,114,255,0.16);
+      box-shadow: 0 10px 24px rgba(61, 86, 148, 0.08);
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      opacity: 0.9;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 1.18rem;
+    }
+
+    .card small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(255,255,255,0.64);
+      border: 1px solid rgba(93,114,255,0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 9px;
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .option:hover {
+      transform: translateY(-1px);
+      border-color: rgba(93,114,255,0.2);
+      box-shadow: 0 8px 20px rgba(55, 80, 140, 0.07);
+    }
+
+    .option input {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .option-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      line-height: 1.4;
+      font-size: 0.98rem;
+    }
+
+    .star-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(93,114,255,0.12);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .selected-count {
+      margin-top: 10px;
+      display: inline-block;
+      background: rgba(93,114,255,0.08);
+      color: var(--muted);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .insight-panel, .reflection-panel, .final-panel {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      border-radius: 26px;
+      padding: 24px;
+      margin-top: 22px;
+      animation: fadeUp 0.7s ease;
+    }
+
+    .hidden { display: none; }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 16px 0 22px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(93,114,255,0.08);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat-box .big {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .stat-box .label {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .identity-wheel-wrap {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .wheel-card {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(93,114,255,0.08);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wheel {
+      width: min(360px, 78vw);
+      height: min(360px, 78vw);
+      border-radius: 50%;
+      position: relative;
+      background: conic-gradient(
+        from -90deg,
+        rgba(93,114,255,0.18) 0deg 30deg,
+        rgba(138,92,255,0.18) 30deg 60deg,
+        rgba(93,114,255,0.10) 60deg 90deg,
+        rgba(138,92,255,0.10) 90deg 120deg,
+        rgba(93,114,255,0.18) 120deg 150deg,
+        rgba(138,92,255,0.18) 150deg 180deg,
+        rgba(93,114,255,0.10) 180deg 210deg,
+        rgba(138,92,255,0.10) 210deg 240deg,
+        rgba(93,114,255,0.18) 240deg 270deg,
+        rgba(138,92,255,0.18) 270deg 300deg,
+        rgba(93,114,255,0.10) 300deg 330deg,
+        rgba(138,92,255,0.10) 330deg 360deg
+      );
+      box-shadow: inset 0 0 0 10px rgba(255,255,255,0.55), 0 14px 34px rgba(55,80,140,0.15);
+      overflow: hidden;
+    }
+
+    .wheel::after {
+      content: "Intersectionality";
+      position: absolute;
+      inset: 29% 29%;
+      background: rgba(255,255,255,0.92);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 18px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+      box-shadow: 0 6px 24px rgba(55,80,140,0.12);
+    }
+
+    .wheel-segment {
+      --rotation: 0deg;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 46%;
+      transform-origin: 0% 0%;
+      transform: rotate(var(--rotation));
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #2d3550;
+      opacity: 0.35;
+      transition: opacity 0.35s ease, color 0.35s ease, transform 0.35s ease;
+    }
+
+    .wheel-segment.active {
+      opacity: 1;
+      color: var(--accent);
+      transform: rotate(var(--rotation)) scale(1.03);
+    }
+
+    .wheel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(93,114,255,0.35);
+      box-shadow: 0 0 0 6px rgba(93,114,255,0.08);
+      flex: 0 0 auto;
+    }
+
+    .wheel-segment.active .wheel-dot {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 6px rgba(93,114,255,0.14);
+    }
+
+    .insight-text {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(93,114,255,0.08);
+      border-radius: 20px;
+      padding: 18px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .reflection-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .reflection-progress {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .prompt-card {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(93,114,255,0.1);
+      border-radius: 20px;
+      padding: 20px;
+      min-height: 245px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .prompt-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(93,114,255,0.12);
+      color: var(--accent);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .prompt-title {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+    }
+
+    .prompt-help {
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      border: 1px solid rgba(93,114,255,0.16);
+      border-radius: 16px;
+      padding: 14px;
+      font: inherit;
+      color: var(--text);
+      background: rgba(255,255,255,0.92);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    textarea:focus {
+      border-color: rgba(93,114,255,0.45);
+      box-shadow: 0 0 0 4px rgba(93,114,255,0.1);
+    }
+
+    .word-count {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: right;
+    }
+
+    .prompt-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+
+    .prompt-actions .left,
+    .prompt-actions .right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .final-panel h2 { margin-top: 0; }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+
+    .pill {
+      background: rgba(93,114,255,0.09);
+      color: #394766;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .reflection-output {
+      background: rgba(255,255,255,0.84);
+      border: 1px solid rgba(93,114,255,0.12);
+      border-radius: 18px;
+      padding: 18px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      min-height: 160px;
+    }
+
+    .submit-reminder {
+      margin-top: 16px;
+      background: linear-gradient(135deg, rgba(93,114,255,0.1), rgba(138,92,255,0.1));
+      border: 1px solid rgba(93,114,255,0.12);
+      border-radius: 20px;
+      padding: 16px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 22px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .fade-delay-1 { animation-delay: 0.05s; }
+    .fade-delay-2 { animation-delay: 0.1s; }
+    .fade-delay-3 { animation-delay: 0.15s; }
+    .fade-delay-4 { animation-delay: 0.2s; }
+    .fade-delay-5 { animation-delay: 0.25s; }
+    .fade-delay-6 { animation-delay: 0.3s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @media (max-width: 980px) {
+      .identity-wheel-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .page { padding: 16px 12px 38px; }
+      .hero, .toolbar, .insight-panel, .reflection-panel, .final-panel { padding: 18px; }
+      .inventory-grid { grid-template-columns: 1fr; }
+      .toolbar-buttons { justify-content: stretch; }
+      .toolbar-buttons button { width: 100%; }
+      .prompt-actions { flex-direction: column; }
+      .prompt-actions .left, .prompt-actions .right { width: 100%; }
+      .prompt-actions button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-orb orb-1"></div>
+  <div class="floating-orb orb-2"></div>
+
+  <div class="page">
+    <section class="hero">
+      <h1>Identity Inventory: Interactive Reflection</h1>
+      <p class="subtitle">
+        Explore the many parts of your identity through a private, interactive inventory. Nothing is submitted or saved from this page. Your goal is to reflect thoughtfully on how multiple identities overlap and shape your daily experiences, opportunities, challenges, and sense of belonging.
+      </p>
+      <div class="notice-wrap">
+        <div class="notice"><strong>Private reflection:</strong> your selections stay on your screen only and are not stored.</div>
+        <div class="notice"><strong>Asterisk reminder:</strong> a star marks a group often treated as dominant or socially advantaged in many U.S. contexts.</div>
+        <div class="notice"><strong>Complete both parts:</strong> finish the inventory, then respond to the guided reflection prompts.</div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="progress-area">
+        <div class="progress-labels">
+          <strong>Inventory progress</strong>
+          <span class="progress-meta"><span id="progressText">0 of 15 categories explored</span></span>
+        </div>
+        <div class="progress-bar" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+      <div class="toolbar-buttons">
+        <button class="secondary-btn" id="randomPromptBtn" type="button">Random reflection tip</button>
+        <button class="secondary-btn" id="resetBtn" type="button">Reset page</button>
+        <button class="primary-btn" id="revealBtn" type="button">Reveal my identity map</button>
+      </div>
+    </section>
+
+    <section class="inventory-grid" id="inventoryGrid"></section>
+
+    <section class="insight-panel hidden" id="insightPanel">
+      <h2>Your Identity Map</h2>
+      <p class="subtitle" style="margin-bottom:0;">
+        This visual is not a score. It is simply a way to help you notice how layered identity can be. Intersectionality reminds us that our experiences are shaped not by one identity alone, but by how multiple identities interact together.
+      </p>
+
+      <div class="insight-grid">
+        <div class="stat-box">
+          <div class="big" id="totalSelections">0</div>
+          <div class="label">total identity markers selected</div>
+        </div>
+        <div class="stat-box">
+          <div class="big" id="categoriesUsed">0</div>
+          <div class="label">categories in which you selected at least one identity</div>
+        </div>
+        <div class="stat-box">
+          <div class="big" id="starSelections">0</div>
+          <div class="label">starred selections from groups often seen as advantaged in many U.S. contexts</div>
+        </div>
+      </div>
+
+      <div class="identity-wheel-wrap">
+        <div class="wheel-card">
+          <div class="wheel" id="identityWheel"></div>
+        </div>
+        <div class="insight-text" id="insightText"></div>
+      </div>
+    </section>
+
+    <section class="reflection-panel" id="reflectionPanel">
+      <div class="reflection-top">
+        <div>
+          <h2 style="margin:0 0 6px;">Guided Reflection</h2>
+          <div class="reflection-progress" id="reflectionProgress">Question 1 of 5</div>
+        </div>
+        <button class="secondary-btn" type="button" id="viewAllResponsesBtn">View all typed responses</button>
+      </div>
+
+      <div class="prompt-card" id="promptCard">
+        <div class="prompt-number" id="promptNumber">1</div>
+        <h3 class="prompt-title" id="promptTitle">Describe which parts of your identity feel most present or noticeable to you in daily life.</h3>
+        <div class="prompt-help" id="promptHelp">Think about the identities you notice first in school, work, home, or public settings.</div>
+        <textarea id="promptInput" placeholder="Type your response here..."></textarea>
+        <div class="word-count" id="wordCount">0 words</div>
+        <div class="prompt-actions">
+          <div class="left">
+            <button class="secondary-btn" type="button" id="backPromptBtn">Previous question</button>
+            <button class="secondary-btn" type="button" id="nextPromptBtn">Next question</button>
+          </div>
+          <div class="right">
+            <button class="secondary-btn" type="button" id="surprisePromptBtn">Show random prompt</button>
+            <button class="primary-btn" type="button" id="buildReflectionBtn">Build my reflection</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-panel hidden" id="finalPanel">
+      <h2>Your Reflection Draft</h2>
+      <p class="subtitle" style="margin-bottom:10px;">
+        This draft brings your responses together into one organized reflection. You can copy it as-is or revise it before submitting.
+      </p>
+      <div class="pill-list" id="completionPills"></div>
+      <div class="reflection-output" id="reflectionOutput"></div>
+      <div class="submit-reminder">
+        <strong>Submission reminder:</strong> take a screenshot of your completed activity if needed, click into the assignment, choose <strong>Create Submission</strong>, write a brief statement that you completed the activity, paste your screenshot if required, and submit.
+      </div>
+      <div class="toolbar-buttons" style="margin-top:16px; justify-content:flex-start;">
+        <button class="secondary-btn" type="button" id="copyReflectionBtn">Copy reflection</button>
+        <button class="secondary-btn" type="button" id="printBtn">Print or save as PDF</button>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      This interactive activity is designed for thoughtful self-reflection. There are no right or wrong answers.
+    </p>
+  </div>
+
+  <script>
+    const categories = [
+      {
+        title: "Race/Ethnicity",
+        help: "Select all that apply.",
+        options: [
+          { label: "White", starred: true },
+          { label: "Black or African American" },
+          { label: "Hispanic/Latino" },
+          { label: "Asian" },
+          { label: "Indigenous/Native American" },
+          { label: "Middle Eastern/North African" },
+          { label: "Multiracial" },
+          { label: "Other" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Gender Identity",
+        help: "Select all that apply.",
+        options: [
+          { label: "Man", starred: true },
+          { label: "Woman" },
+          { label: "Non-binary" },
+          { label: "Transgender" },
+          { label: "Genderfluid" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Sexual Orientation",
+        help: "Select all that apply.",
+        options: [
+          { label: "Heterosexual", starred: true },
+          { label: "Gay" },
+          { label: "Lesbian" },
+          { label: "Bisexual" },
+          { label: "Queer" },
+          { label: "Asexual" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Socioeconomic Class",
+        help: "Select all that apply.",
+        options: [
+          { label: "Upper class", starred: true },
+          { label: "Upper middle class" },
+          { label: "Middle class" },
+          { label: "Working class" },
+          { label: "Lower class" }
+        ]
+      },
+      {
+        title: "Age",
+        help: "Select the group or groups you identify with.",
+        options: [
+          { label: "26-50", starred: true },
+          { label: "Under 18" },
+          { label: "18-25" },
+          { label: "51-65" },
+          { label: "66+" }
+        ]
+      },
+      {
+        title: "Body Size",
+        help: "Select all that apply.",
+        options: [
+          { label: "Thin/average build", starred: true },
+          { label: "Fat / larger-bodied" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Ability (Physical/Cognitive)",
+        help: "Select all that apply.",
+        options: [
+          { label: "Non-disabled", starred: true },
+          { label: "Physical disability" },
+          { label: "Cognitive disability" },
+          { label: "Invisible disability" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Geographic Region",
+        help: "Select all that apply.",
+        options: [
+          { label: "Suburban", starred: true },
+          { label: "Urban" },
+          { label: "Rural" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Mental Health",
+        help: "Select all that apply.",
+        options: [
+          { label: "No mental health conditions", starred: true },
+          { label: "Ongoing mental health condition" },
+          { label: "History of mental health challenges" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Neurodivergence",
+        help: "Select all that apply.",
+        options: [
+          { label: "Neurotypical", starred: true },
+          { label: "ADHD" },
+          { label: "Autism" },
+          { label: "Dyslexia" },
+          { label: "Other neurodivergence" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Religion",
+        help: "Select all that apply.",
+        options: [
+          { label: "Christian", starred: true },
+          { label: "Jewish" },
+          { label: "Muslim" },
+          { label: "Buddhist" },
+          { label: "Hindu" },
+          { label: "Atheist/Agnostic" },
+          { label: "Other" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Primary Language",
+        help: "Select all that apply.",
+        options: [
+          { label: "English", starred: true },
+          { label: "Spanish" },
+          { label: "Arabic" },
+          { label: "Chinese" },
+          { label: "ASL" },
+          { label: "Other" }
+        ]
+      },
+      {
+        title: "Citizenship/Immigration Status",
+        help: "Select all that apply.",
+        options: [
+          { label: "U.S. Citizen", starred: true },
+          { label: "Permanent Resident" },
+          { label: "International Student" },
+          { label: "Undocumented" },
+          { label: "Prefer not to say" }
+        ]
+      },
+      {
+        title: "Family Role",
+        help: "Select all that apply.",
+        options: [
+          { label: "Married/Partnered", starred: true },
+          { label: "Single" },
+          { label: "Parent" },
+          { label: "Caregiver" },
+          { label: "Other" }
+        ]
+      },
+      {
+        title: "Military Status",
+        help: "Select all that apply.",
+        options: [
+          { label: "No military affiliation", starred: true },
+          { label: "Active Duty" },
+          { label: "Veteran" },
+          { label: "Dependent/Family Member" }
+        ]
+      },
+      {
+        title: "Political Ideology",
+        help: "Select all that apply.",
+        options: [
+          { label: "Moderate / Centrist" },
+          { label: "Conservative", starred: true },
+          { label: "Liberal" },
+          { label: "Progressive" },
+          { label: "Other" },
+          { label: "Prefer not to say" }
+        ]
+      }
+    ];
+
+    const reflectionPrompts = [
+      {
+        title: "Describe which parts of your identity feel most present or noticeable to you in daily life.",
+        help: "Think about the identities you notice first in school, work, home, or public settings."
+      },
+      {
+        title: "Reflect on any parts of your identity that feel less visible or that you rarely think about, but that still shape how you move through the world.",
+        help: "Consider identities that influence your experiences even when they are not obvious to others."
+      },
+      {
+        title: "Share anything you noticed or realized about yourself while completing this activity that you had not thought much about before.",
+        help: "A strong response might include a surprise, a new awareness, or a change in perspective."
+      },
+      {
+        title: "Describe how one or more aspects of your identity have shaped your experiences with opportunity, challenge, or belonging.",
+        help: "You can think about classrooms, workplaces, neighborhoods, families, friendships, or institutions."
+      },
+      {
+        title: "Explain how seeing all these categories together helped you better understand intersectionality, or the way multiple identities overlap and interact.",
+        help: "Focus on how identities work together rather than separately."
+      }
+    ];
+
+    const reflectionTips = [
+      "Think about where you feel most seen, most misunderstood, or most expected to fit in.",
+      "You do not need to explain every identity. Focus on the ones that feel meaningful to you.",
+      "A thoughtful reflection can include both privilege and challenge at the same time.",
+      "Intersectionality means identities overlap, not that one single identity tells the whole story.",
+      "Consider how different settings can make certain identities feel more visible than others.",
+      "You can reflect on belonging, pressure, invisibility, opportunity, safety, or support."
+    ];
+
+    const inventoryGrid = document.getElementById("inventoryGrid");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const revealBtn = document.getElementById("revealBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const randomPromptBtn = document.getElementById("randomPromptBtn");
+
+    const insightPanel = document.getElementById("insightPanel");
+    const totalSelectionsEl = document.getElementById("totalSelections");
+    const categoriesUsedEl = document.getElementById("categoriesUsed");
+    const starSelectionsEl = document.getElementById("starSelections");
+    const insightText = document.getElementById("insightText");
+    const identityWheel = document.getElementById("identityWheel");
+
+    const reflectionProgress = document.getElementById("reflectionProgress");
+    const promptNumber = document.getElementById("promptNumber");
+    const promptTitle = document.getElementById("promptTitle");
+    const promptHelp = document.getElementById("promptHelp");
+    const promptInput = document.getElementById("promptInput");
+    const wordCount = document.getElementById("wordCount");
+    const backPromptBtn = document.getElementById("backPromptBtn");
+    const nextPromptBtn = document.getElementById("nextPromptBtn");
+    const surprisePromptBtn = document.getElementById("surprisePromptBtn");
+    const buildReflectionBtn = document.getElementById("buildReflectionBtn");
+    const viewAllResponsesBtn = document.getElementById("viewAllResponsesBtn");
+
+    const finalPanel = document.getElementById("finalPanel");
+    const completionPills = document.getElementById("completionPills");
+    const reflectionOutput = document.getElementById("reflectionOutput");
+    const copyReflectionBtn = document.getElementById("copyReflectionBtn");
+    const printBtn = document.getElementById("printBtn");
+
+    let currentPromptIndex = 0;
+    const promptResponses = new Array(reflectionPrompts.length).fill("");
+
+    function createInventoryCards() {
+      inventoryGrid.innerHTML = "";
+
+      categories.forEach((category, categoryIndex) => {
+        const card = document.createElement("article");
+        card.className = `card fade-delay-${(categoryIndex % 6) + 1}`;
+        card.dataset.categoryIndex = categoryIndex;
+
+        const title = document.createElement("h3");
+        title.textContent = category.title;
+
+        const help = document.createElement("small");
+        help.textContent = category.help;
+
+        const optionsWrap = document.createElement("div");
+
+        category.options.forEach((option, optionIndex) => {
+          const label = document.createElement("label");
+          label.className = "option";
+
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.dataset.categoryIndex = categoryIndex;
+          input.dataset.optionIndex = optionIndex;
+          input.dataset.starred = option.starred ? "true" : "false";
+          input.addEventListener("change", updateAll);
+
+          const textWrap = document.createElement("span");
+          textWrap.className = "option-text";
+
+          const text = document.createElement("span");
+          text.textContent = option.label;
+          textWrap.appendChild(text);
+
+          if (option.starred) {
+            const badge = document.createElement("span");
+            badge.className = "star-badge";
+            badge.textContent = "★ dominant";
+            textWrap.appendChild(badge);
+          }
+
+          label.appendChild(input);
+          label.appendChild(textWrap);
+          optionsWrap.appendChild(label);
+        });
+
+        const count = document.createElement("div");
+        count.className = "selected-count";
+        count.id = `selectedCount-${categoryIndex}`;
+        count.textContent = "0 selected";
+
+        card.appendChild(title);
+        card.appendChild(help);
+        card.appendChild(optionsWrap);
+        card.appendChild(count);
+        inventoryGrid.appendChild(card);
+      });
+    }
+
+    function getSelections() {
+      return Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+    }
+
+    function getCategorySelections(categoryIndex) {
+      return Array.from(document.querySelectorAll(`input[data-category-index="${categoryIndex}"]:checked`));
+    }
+
+    function updateProgress() {
+      let explored = 0;
+
+      categories.forEach((_, categoryIndex) => {
+        const count = getCategorySelections(categoryIndex).length;
+        const countEl = document.getElementById(`selectedCount-${categoryIndex}`);
+        if (countEl) {
+          countEl.textContent = `${count} selected`;
+        }
+        if (count > 0) explored += 1;
+      });
+
+      const percent = Math.round((explored / categories.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      progressText.textContent = `${explored} of ${categories.length} categories explored`;
+    }
+
+    function buildIdentityWheel(activeMap) {
+      identityWheel.innerHTML = "";
+      const total = categories.length;
+      const angleStep = 360 / total;
+
+      categories.forEach((category, index) => {
+        const seg = document.createElement("div");
+        seg.className = "wheel-segment" + (activeMap[index] ? " active" : "");
+        seg.style.setProperty("--rotation", `${index * angleStep - 90}deg`);
+
+        const dot = document.createElement("span");
+        dot.className = "wheel-dot";
+
+        const label = document.createElement("span");
+        label.textContent = category.title;
+
+        seg.appendChild(dot);
+        seg.appendChild(label);
+        identityWheel.appendChild(seg);
+      });
+    }
+
+    function revealInsights() {
+      const allSelections = getSelections();
+      const categoryCounts = categories.map((_, index) => getCategorySelections(index).length);
+      const categoriesUsed = categoryCounts.filter(count => count > 0).length;
+      const starCount = allSelections.filter(box => box.dataset.starred === "true").length;
+      const nonStarCount = allSelections.length - starCount;
+
+      totalSelectionsEl.textContent = allSelections.length;
+      categoriesUsedEl.textContent = categoriesUsed;
+      starSelectionsEl.textContent = starCount;
+
+      buildIdentityWheel(categoryCounts.map(count => count > 0));
+
+      const messageParts = [];
+      if (categoriesUsed === 0) {
+        messageParts.push("You have not selected any categories yet. Once you make selections, your identity map will help you visualize how many social locations you are holding together at the same time.");
+      } else {
+        messageParts.push(`You selected at least one identity in ${categoriesUsed} of the ${categories.length} categories shown here, which highlights how layered identity can be.`);
+
+        if (starCount > 0 && nonStarCount > 0) {
+          messageParts.push(`Your selections include both starred and non-starred identities. This can be a useful reminder that a person may experience both relative social advantage and social challenge at the same time, depending on the setting.`);
+        } else if (starCount > 0 && nonStarCount === 0) {
+          messageParts.push(`Many of your selections fall in categories often treated as socially advantaged in many U.S. contexts. Reflecting on that can help you think about what may feel "normal" or invisible to you in daily life.`);
+        } else if (starCount === 0 && nonStarCount > 0) {
+          messageParts.push(`Your selections highlight identities that are not typically treated as dominant in many U.S. contexts. Reflecting on this can help you think about visibility, belonging, challenge, and resilience.`);
+        }
+
+        messageParts.push("Intersectionality asks us to look at how identities overlap rather than isolating one category at a time. Your reflection is the place where those overlaps become meaningful.");
+      }
+
+      insightText.innerHTML = `<p>${messageParts.join("</p><p>")}</p>`;
+      insightPanel.classList.remove("hidden");
+      insightPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function updateAll() {
+      updateProgress();
+    }
+
+    function setPrompt(index) {
+      currentPromptIndex = index;
+      const prompt = reflectionPrompts[index];
+      promptNumber.textContent = index + 1;
+      promptTitle.textContent = prompt.title;
+      promptHelp.textContent = prompt.help;
+      promptInput.value = promptResponses[index];
+      reflectionProgress.textContent = `Question ${index + 1} of ${reflectionPrompts.length}`;
+      updateWordCount();
+      backPromptBtn.disabled = index === 0;
+      nextPromptBtn.disabled = index === reflectionPrompts.length - 1;
+    }
+
+    function saveCurrentPrompt() {
+      promptResponses[currentPromptIndex] = promptInput.value.trim();
+    }
+
+    function updateWordCount() {
+      const words = promptInput.value.trim() ? promptInput.value.trim().split(/\s+/).length : 0;
+      wordCount.textContent = `${words} words`;
+    }
+
+    function buildReflectionText() {
+      saveCurrentPrompt();
+
+      const answeredCount = promptResponses.filter(Boolean).length;
+      completionPills.innerHTML = "";
+
+      for (let i = 0; i < reflectionPrompts.length; i += 1) {
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.textContent = promptResponses[i] ? `Question ${i + 1}: complete` : `Question ${i + 1}: incomplete`;
+        completionPills.appendChild(pill);
+      }
+
+      let combined = "";
+
+      if (answeredCount === 0) {
+        combined = "Start typing into the reflection prompts above, then click Build my reflection to create a draft paragraph from your ideas.";
+      } else {
+        const sections = [
+          promptResponses[0],
+          promptResponses[1],
+          promptResponses[2],
+          promptResponses[3],
+          promptResponses[4]
+        ].filter(Boolean);
+
+        combined = sections.join(" ");
+      }
+
+      reflectionOutput.textContent = combined;
+      finalPanel.classList.remove("hidden");
+      finalPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showAllResponses() {
+      saveCurrentPrompt();
+      const lines = reflectionPrompts.map((prompt, index) => {
+        const response = promptResponses[index] || "[No response typed yet]";
+        return `Question ${index + 1}: ${prompt.title}\n${response}`;
+      });
+      alert(lines.join("\n\n"));
+    }
+
+    function showRandomTip() {
+      const tip = reflectionTips[Math.floor(Math.random() * reflectionTips.length)];
+      alert(`Reflection tip:\n\n${tip}`);
+    }
+
+    function resetPage() {
+      if (!confirm("Reset all selections and written responses on this page?")) return;
+
+      document.querySelectorAll('input[type="checkbox"]').forEach(box => {
+        box.checked = false;
+      });
+
+      for (let i = 0; i < promptResponses.length; i += 1) {
+        promptResponses[i] = "";
+      }
+
+      promptInput.value = "";
+      insightPanel.classList.add("hidden");
+      finalPanel.classList.add("hidden");
+      setPrompt(0);
+      updateAll();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function copyReflection() {
+      try {
+        await navigator.clipboard.writeText(reflectionOutput.textContent);
+        alert("Reflection copied to your clipboard.");
+      } catch (error) {
+        alert("Copy did not work in this browser. You can still highlight and copy the reflection manually.");
+      }
+    }
+
+    function printPage() {
+      window.print();
+    }
+
+    revealBtn.addEventListener("click", revealInsights);
+    resetBtn.addEventListener("click", resetPage);
+    randomPromptBtn.addEventListener("click", showRandomTip);
+
+    promptInput.addEventListener("input", () => {
+      promptResponses[currentPromptIndex] = promptInput.value;
+      updateWordCount();
+    });
+
+    backPromptBtn.addEventListener("click", () => {
+      saveCurrentPrompt();
+      if (currentPromptIndex > 0) setPrompt(currentPromptIndex - 1);
+    });
+
+    nextPromptBtn.addEventListener("click", () => {
+      saveCurrentPrompt();
+      if (currentPromptIndex < reflectionPrompts.length - 1) setPrompt(currentPromptIndex + 1);
+    });
+
+    surprisePromptBtn.addEventListener("click", showRandomTip);
+    buildReflectionBtn.addEventListener("click", buildReflectionText);
+    viewAllResponsesBtn.addEventListener("click", showAllResponses);
+    copyReflectionBtn.addEventListener("click", copyReflection);
+    printBtn.addEventListener("click", printPage);
+
+    createInventoryCards();
+    setPrompt(0);
+    updateAll();
+  </script>
+</body>
+</html>
