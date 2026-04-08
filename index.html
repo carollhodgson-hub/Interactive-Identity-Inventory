@@ -1120,7 +1120,7 @@
         dot.className = "wheel-dot";
 
         const label = document.createElement("span");
-        label.textContent = category.title;
+        label.textContent = category.short || category.title;
 
         seg.appendChild(dot);
         seg.appendChild(label);
