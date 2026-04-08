@@ -399,49 +399,47 @@
       overflow: hidden;
     }
 
-.wheel::after {
-  content: "Intersectionality";
-  position: absolute;
-  inset: 33% 33%;
-  background: rgba(255,255,255,0.94);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 14px;
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: var(--text);
-  line-height: 1.2;
-  box-shadow: 0 6px 24px rgba(55,80,140,0.12);
-}
+    .wheel::after {
+      content: "Intersectionality";
+      position: absolute;
+      inset: 29% 29%;
+      background: rgba(255,255,255,0.92);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 18px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+      box-shadow: 0 6px 24px rgba(55,80,140,0.12);
+    }
 
-  .wheel-segment {
-  --rotation: 0deg;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 38%;
-  transform-origin: 0% 0%;
-  transform: rotate(var(--rotation)) translateX(32px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-left: 6px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #2d3550;
-  opacity: 0.55;
-  white-space: nowrap;
-  transition: opacity 0.35s ease, color 0.35s ease, transform 0.35s ease;
-}
-  
- .wheel-segment.active {
-  opacity: 1;
-  color: var(--accent);
-  transform: rotate(var(--rotation)) translateX(32px) scale(1.03);
-}
+    .wheel-segment {
+      --rotation: 0deg;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 46%;
+      transform-origin: 0% 0%;
+      transform: rotate(var(--rotation));
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #2d3550;
+      opacity: 0.35;
+      transition: opacity 0.35s ease, color 0.35s ease, transform 0.35s ease;
+    }
+
+    .wheel-segment.active {
+      opacity: 1;
+      color: var(--accent);
+      transform: rotate(var(--rotation)) scale(1.03);
+    }
 
     .wheel-dot {
       width: 12px;
@@ -753,7 +751,6 @@
     const categories = [
       {
         title: "Race/Ethnicity",
-        short: "Race/Ethnic",
         help: "Select all that apply.",
         options: [
           { label: "White", starred: true },
@@ -769,7 +766,6 @@
       },
       {
         title: "Gender Identity",
-        short: "Gender",
         help: "Select all that apply.",
         options: [
           { label: "Man", starred: true },
@@ -782,7 +778,6 @@
       },
       {
         title: "Sexual Orientation",
-        short: "Sex Orientation",
         help: "Select all that apply.",
         options: [
           { label: "Heterosexual", starred: true },
@@ -796,7 +791,6 @@
       },
       {
         title: "Socioeconomic Class",
-        short: "Soc Class",
         help: "Select all that apply.",
         options: [
           { label: "Upper class", starred: true },
@@ -808,7 +802,6 @@
       },
       {
         title: "Age",
-        short: "Age",
         help: "Select the group or groups you identify with.",
         options: [
           { label: "26-50", starred: true },
@@ -820,7 +813,6 @@
       },
       {
         title: "Body Size",
-        short: "Body Size",
         help: "Select all that apply.",
         options: [
           { label: "Thin/average build", starred: true },
@@ -829,11 +821,8 @@
         ]
       },
       {
-      
-      title: "Ability (Physical/Cognitive)",
-      short: "Ability",
-      help: "Select all that apply.",
-      help: "Select all that apply.",
+        title: "Ability (Physical/Cognitive)",
+        help: "Select all that apply.",
         options: [
           { label: "Non-disabled", starred: true },
           { label: "Physical disability" },
@@ -844,7 +833,6 @@
       },
       {
         title: "Geographic Region",
-        short: "Region",
         help: "Select all that apply.",
         options: [
           { label: "Suburban", starred: true },
@@ -855,7 +843,6 @@
       },
       {
         title: "Mental Health",
-        short: "Mental Health",
         help: "Select all that apply.",
         options: [
           { label: "No mental health conditions", starred: true },
@@ -866,7 +853,6 @@
       },
       {
         title: "Neurodivergence",
-        short: "Neurodivergence",
         help: "Select all that apply.",
         options: [
           { label: "Neurotypical", starred: true },
@@ -879,7 +865,6 @@
       },
       {
         title: "Religion",
-        short: "Religion",
         help: "Select all that apply.",
         options: [
           { label: "Christian", starred: true },
@@ -894,7 +879,6 @@
       },
       {
         title: "Primary Language",
-        short: "Language",
         help: "Select all that apply.",
         options: [
           { label: "English", starred: true },
@@ -907,7 +891,6 @@
       },
       {
         title: "Citizenship/Immigration Status",
-        short: "Citizenship",
         help: "Select all that apply.",
         options: [
           { label: "U.S. Citizen", starred: true },
@@ -919,7 +902,6 @@
       },
       {
         title: "Family Role",
-        short: "Family",
         help: "Select all that apply.",
         options: [
           { label: "Married/Partnered", starred: true },
@@ -931,7 +913,6 @@
       },
       {
         title: "Military Status",
-        short: "Military"
         help: "Select all that apply.",
         options: [
           { label: "No military affiliation", starred: true },
@@ -942,7 +923,6 @@
       },
       {
         title: "Political Ideology",
-        short: "Politcal",
         help: "Select all that apply.",
         options: [
           { label: "Moderate / Centrist" },
